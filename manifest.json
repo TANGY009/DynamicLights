@@ -1,7 +1,7 @@
 {
-    "name": "${modName}",
-    "entry": "${modFile}",
-    "version": "${modVersion}",
-    "type": "native",
-    "platform": "${modPlatform}"
+  "name": "${modName}",
+  "entry": "${modFile}",
+  "version": "${modVersion}",
+  "type": "native",
+  "platform": "client"
 }
