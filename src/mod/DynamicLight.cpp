@@ -22,8 +22,8 @@
 #include "mc/world/level/chunk/LevelChunk.h"
 #include "mc/world/level/dimension/Dimension.h"
 
-#include <optional>
 #include <cmath>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -271,12 +271,12 @@ void updateAppliedLight(LocalPlayer& player) {
 
     if (gAppliedLight.has_value()) {
         auto const& applied = *gAppliedLight;
-        auto const sameMain = candidate.isActive() && isSameLight(applied, dimension, position, candidate.fakeBlockName);
+        auto const  sameMain =
+            candidate.isActive() && isSameLight(applied, dimension, position, candidate.fakeBlockName);
         if (!sameMain || candidate.brightness <= actualBrightness) {
             if (candidate.isActive() && candidate.brightness > actualBrightness && applied.isActive()
                 && applied.dimension == std::addressof(dimension) && applied.level == std::addressof(level)
-                && applied.fakeBlockName == candidate.fakeBlockName
-                && isAdjacentBlock(applied.position, position)) {
+                && applied.fakeBlockName == candidate.fakeBlockName && isAdjacentBlock(applied.position, position)) {
                 clearOneLight(gTrailingLight);
                 gTrailingLight = applied;
                 gAppliedLight.reset();
@@ -328,29 +328,21 @@ DynamicLight& DynamicLight::getInstance() {
 
 bool DynamicLight::load() {
     getSelf().getLogger().debug("Loading...");
+    if (auto const result = LocalPlayerTickWorldHook::hook(); result != 0) {
+        getSelf().getLogger().error("Failed to hook LocalPlayer::tickWorld, error code: {}", result);
+        return false;
+    }
     return true;
 }
 
 bool DynamicLight::enable() {
     getSelf().getLogger().debug("Enabling...");
-
-    if (auto const result = LocalPlayerTickWorldHook::hook(); result != 0) {
-        getSelf().getLogger().error("Failed to hook LocalPlayer::tickWorld, error code: {}", result);
-        return false;
-    }
-
     return true;
 }
 
 bool DynamicLight::disable() {
     getSelf().getLogger().debug("Disabling...");
     clearAppliedLight();
-
-    if (!LocalPlayerTickWorldHook::unhook()) {
-        getSelf().getLogger().error("Failed to unhook LocalPlayer::tickWorld");
-        return false;
-    }
-
     return true;
 }
 
